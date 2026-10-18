@@ -1,10 +1,7 @@
 import unittest
 
+from weathersummary.aggregations import PrecipitationAggregation, TemperatureAggregation
 from weathersummary.models import WeatherRecord
-from weathersummary.aggregations import (
-    TemperatureAggregation,
-    PrecipitationAggregation
-)
 
 
 class TestWeatherSummary(unittest.TestCase):
@@ -24,7 +21,7 @@ class TestWeatherSummary(unittest.TestCase):
         records = [
             WeatherRecord("2026-10-08T10:00", 10, 1),
             WeatherRecord("2026-10-08T11:00", 20, 2),
-            WeatherRecord("2026-10-08T12:00", 30, 3)
+            WeatherRecord("2026-10-08T12:00", 30, 3),
         ]
 
         result = TemperatureAggregation().calculate(records)
@@ -39,7 +36,7 @@ class TestWeatherSummary(unittest.TestCase):
         records = [
             WeatherRecord("2026-10-08T10:00", 10, 1),
             WeatherRecord("2026-10-08T11:00", 20, 2),
-            WeatherRecord("2026-10-08T12:00", 30, 3)
+            WeatherRecord("2026-10-08T12:00", 30, 3),
         ]
 
         result = PrecipitationAggregation().calculate(records)
