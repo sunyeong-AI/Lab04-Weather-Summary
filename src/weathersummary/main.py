@@ -23,9 +23,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    setup_logging("INFO")
+
     try:
         config = load_config(Path(args.config))
-        setup_logging(config.log_level)
+        logging.getLogger().setLevel(config.log_level.upper())
 
         logger.info("Starting weather summary.")
 
