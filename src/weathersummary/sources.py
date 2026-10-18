@@ -1,27 +1,25 @@
 import requests
 
 from .config import SOURCE_URL, TIMEOUT
+from .errors import DataError, SourceError
 from .models import WeatherRecord
 
 
-class WeatherSource:
-    """Fetch hourly weather records from the Open-Meteo API."""
+def download_weather_data(url: str, timeout: int) -> dict:
+    """Download weather data from the API."""
+    try:
+        response = requests.get(url, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as err:
+        raise SourceError("Could not download the weather data.") from err
+    except ValueError as err:
+        raise DataError("The API returned invalid JSON data.") from err
 
-    def __init__(self) -> None:
-        self.url = SOURCE_URL
-        self.timeout = TIMEOUT
 
-    def fetch(self) -> list[WeatherRecord] | None:
-        """Download weather data and create WeatherRecord objects."""
-        try:
-            response = requests.get(self.url, timeout=self.timeout)
-            response.raise_for_status()
-            data = response.json()
-
-        except requests.RequestException:
-            print("Could not download the weather data.")
-            return None
-
+def parse_weather_data(data: dict) -> list[WeatherRecord]:
+    """Convert API data into WeatherRecord objects."""
+    try:
         hourly_data = data["hourly"]
         times = hourly_data["time"]
         temperatures = hourly_data["temperature_2m"]
@@ -36,3 +34,20 @@ class WeatherSource:
             records.append(record)
 
         return records
+
+    except (KeyError, TypeError) as err:
+        raise DataError("The weather data has an invalid structure.") from err
+
+
+class WeatherSource:
+    """Fetch hourly weather records from the Open-Meteo API."""
+
+    def __init__(self) -> None:
+        self.url = SOURCE_URL
+        self.timeout = TIMEOUT
+
+    def fetch(self) -> list[WeatherRecord]:
+        """Download and parse weather data."""
+        data = download_weather_data(self.url, self.timeout)
+
+        return parse_weather_data(data)
