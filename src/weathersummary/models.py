@@ -1,25 +1,33 @@
 class WeatherRecord:
     """Represent one hourly weather record and clean invalid values."""
 
-    def __init__(self, time, temperature, precipitation):
+    def __init__(
+        self,
+        time: str,
+        temperature: str | float | None,
+        precipitation: str | float | None,
+    ) -> None:
         self.time = time
         self.date = time.split("T")[0]
 
+        self.temperature: float | None = None
+        self.precipitation: float | None = None
+
         try:
-            self.temperature = float(temperature)
+            self.temperature = float(temperature) if temperature is not None else None
         except (TypeError, ValueError):
             self.temperature = None
 
         try:
-            precipitation = float(precipitation)
+            precipitation_value = (
+                float(precipitation) if precipitation is not None else None
+            )
 
-            if precipitation < 0:
-                self.precipitation = None
-            else:
-                self.precipitation = precipitation
+            if precipitation_value is not None and precipitation_value >= 0:
+                self.precipitation = precipitation_value
 
         except (TypeError, ValueError):
             self.precipitation = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.date}: temperature={self.temperature}, precipitation={self.precipitation}"

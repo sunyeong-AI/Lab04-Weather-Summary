@@ -1,7 +1,10 @@
+from .models import WeatherRecord
+
+
 class Aggregation:
     """Base class for weather aggregations."""
 
-    def calculate(self, records):
+    def calculate(self, records: list[WeatherRecord]) -> dict:
         """Return aggregation results."""
         return {}
 
@@ -9,10 +12,10 @@ class Aggregation:
 class TemperatureAggregation(Aggregation):
     """Calculate daily temperature statistics."""
 
-    def calculate(self, records):
+    def calculate(self, records: list[WeatherRecord]) -> dict:
         """Calculate daily minimum, maximum, and mean temperatures."""
 
-        daily_temperatures = {}
+        daily_temperatures: dict[str, list[float]] = {}
 
         for record in records:
             if record.temperature is None:
@@ -32,11 +35,7 @@ class TemperatureAggregation(Aggregation):
             maximum = max(temperatures)
             mean = sum(temperatures) / len(temperatures)
 
-            daily_temp_stats[date] = {
-                "min": minimum,
-                "max": maximum,
-                "mean": mean
-            }
+            daily_temp_stats[date] = {"min": minimum, "max": maximum, "mean": mean}
 
         return daily_temp_stats
 
@@ -44,10 +43,10 @@ class TemperatureAggregation(Aggregation):
 class PrecipitationAggregation(Aggregation):
     """Calculate daily precipitation totals."""
 
-    def calculate(self, records):
+    def calculate(self, records: list[WeatherRecord]) -> dict:
         """Calculate total precipitation for each day."""
 
-        daily_precipitations = {}
+        daily_precipitations: dict[str, list[float]] = {}
 
         for record in records:
             if record.precipitation is None:
