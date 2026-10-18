@@ -15,6 +15,14 @@ class TestWeatherSummary(unittest.TestCase):
         self.assertIsNone(record.temperature)
         self.assertIsNone(record.precipitation)
 
+    def test_missing_values(self):
+        """Check that missing weather values remain None."""
+
+        record = WeatherRecord("2026-10-08T10:00", None, None)
+
+        self.assertIsNone(record.temperature)
+        self.assertIsNone(record.precipitation)
+
     def test_temperature_aggregation(self):
         """Check daily minimum, maximum, and mean temperatures."""
 
