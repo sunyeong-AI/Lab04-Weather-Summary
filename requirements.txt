@@ -16,3 +16,4 @@ requests==2.34.2
 ruff==0.17.1
 typing_extensions==4.16.0
 urllib3==2.8.0
+types-requests==2.33.0.20261006
