@@ -10,7 +10,13 @@ def download_weather_data(url: str, timeout: int) -> dict:
     try:
         response = requests.get(url, timeout=timeout)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+
+        if not isinstance(data, dict):
+            raise DataError("The API returned invalid JSON data.")
+
+        return data
+
     except requests.RequestException as err:
         raise SourceError("Could not download the weather data.") from err
     except ValueError as err:
