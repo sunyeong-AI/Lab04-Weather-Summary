@@ -1,5 +1,5 @@
-from weathersummary.sources import WeatherSource
 from weathersummary.report import build_summary, write_summary
+from weathersummary.sources import WeatherSource
 
 
 def main():
