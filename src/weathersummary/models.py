@@ -30,4 +30,7 @@ class WeatherRecord:
             self.precipitation = None
 
     def __str__(self) -> str:
-        return f"{self.date}: temperature={self.temperature}, precipitation={self.precipitation}"
+        return (
+            f"{self.date}: temperature={self.temperature}, "
+            f"precipitation={self.precipitation}"
+        )

@@ -34,7 +34,7 @@ def parse_weather_data(data: dict) -> list[WeatherRecord]:
         records = []
 
         for time, temperature, precipitation in zip(
-            times, temperatures, precipitations
+            times, temperatures, precipitations, strict=False
         ):
             record = WeatherRecord(time, temperature, precipitation)
             records.append(record)
