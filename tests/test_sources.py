@@ -47,5 +47,5 @@ def test_parse_weather_data_missing_field():
         }
     }
 
-    with pytest.raises(DataError):
+    with pytest.raises(DataError, match="invalid structure"):
         parse_weather_data(data)
