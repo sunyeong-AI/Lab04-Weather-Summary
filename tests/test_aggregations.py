@@ -1,3 +1,5 @@
+import logging
+
 from weathersummary.aggregations import (
     PrecipitationAggregation,
     TemperatureAggregation,
@@ -60,3 +62,17 @@ def test_precipitation_aggregation_single_day() -> None:
     result = PrecipitationAggregation().calculate(records)
 
     assert result["2026-10-08"] == 6.0
+
+
+def test_missing_precipitation_logs_warning(caplog) -> None:
+    """Test that missing precipitation produces a warning log."""
+
+    records = [
+        WeatherRecord("2026-10-08T10:00", 15.0, None),
+    ]
+
+    with caplog.at_level(logging.WARNING):
+        PrecipitationAggregation().calculate(records)
+
+    assert "Skipping missing precipitation" in caplog.text
+    assert "2026-10-08T10:00" in caplog.text

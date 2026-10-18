@@ -1,4 +1,8 @@
+import logging
+
 from .models import WeatherRecord
+
+logger = logging.getLogger(__name__)
 
 
 class Aggregation:
@@ -19,6 +23,7 @@ class TemperatureAggregation(Aggregation):
 
         for record in records:
             if record.temperature is None:
+                logger.warning("Skipping missing temperature for %s.", record.time)
                 continue
 
             date = record.date
@@ -50,6 +55,7 @@ class PrecipitationAggregation(Aggregation):
 
         for record in records:
             if record.precipitation is None:
+                logger.warning("Skipping missing precipitation for %s.", record.time)
                 continue
 
             date = record.date

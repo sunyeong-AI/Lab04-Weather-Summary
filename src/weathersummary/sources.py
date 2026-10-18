@@ -1,8 +1,12 @@
+import logging
+
 import requests
 
 from .config import SOURCE_URL, TIMEOUT, WeatherConfig
 from .errors import DataError, SourceError
 from .models import WeatherRecord
+
+logger = logging.getLogger(__name__)
 
 
 def download_weather_data(url: str, timeout: int) -> dict:
@@ -39,8 +43,9 @@ def parse_weather_data(data: dict) -> list[WeatherRecord]:
             record = WeatherRecord(time, temperature, precipitation)
             records.append(record)
 
-        return records
+        logger.debug("Parsed %d weather records.", len(records))
 
+        return records
     except (KeyError, TypeError) as err:
         raise DataError("The weather data has an invalid structure.") from err
 
