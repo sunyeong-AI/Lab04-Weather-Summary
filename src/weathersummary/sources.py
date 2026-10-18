@@ -1,6 +1,6 @@
 import requests
 
-from .config import SOURCE_URL, TIMEOUT
+from .config import SOURCE_URL, TIMEOUT, WeatherConfig
 from .errors import DataError, SourceError
 from .models import WeatherRecord
 
@@ -42,9 +42,13 @@ def parse_weather_data(data: dict) -> list[WeatherRecord]:
 class WeatherSource:
     """Fetch hourly weather records from the Open-Meteo API."""
 
-    def __init__(self) -> None:
-        self.url = SOURCE_URL
-        self.timeout = TIMEOUT
+    def __init__(self, config: WeatherConfig | None = None) -> None:
+        if config is None:
+            self.url = SOURCE_URL
+            self.timeout = TIMEOUT
+        else:
+            self.url = config.source_url
+            self.timeout = config.timeout
 
     def fetch(self) -> list[WeatherRecord]:
         """Download and parse weather data."""
