@@ -1,3 +1,5 @@
+import pytest
+
 from weathersummary.models import WeatherRecord
 from weathersummary.sampling import sample_days
 
@@ -21,14 +23,15 @@ def test_sample_days_are_reproducible() -> None:
     assert first_result == second_result
 
 
-def test_sample_days_returns_requested_number() -> None:
-    """The function should return the requested number of dates."""
+@pytest.mark.parametrize("sample_size", [1, 3, 5])
+def test_sample_days_returns_requested_number(sample_size: int) -> None:
+    """Test sampling with different requested numbers of dates."""
 
     records = create_records()
 
-    result = sample_days(records, seed=42, sample_size=5)
+    result = sample_days(records, seed=42, sample_size=sample_size)
 
-    assert len(result) == 5
+    assert len(result) == sample_size
 
 
 def test_sample_days_contains_unique_dates() -> None:
