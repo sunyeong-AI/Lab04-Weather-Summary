@@ -1,7 +1,11 @@
+from .aggregations import Aggregation, PrecipitationAggregation, TemperatureAggregation
 from .models import WeatherRecord
 from .sources import WeatherSource
-from .aggregations import (
-    Aggregation,
-    TemperatureAggregation,
-    PrecipitationAggregation
-)
+
+__all__ = [
+    "Aggregation",
+    "PrecipitationAggregation",
+    "TemperatureAggregation",
+    "WeatherRecord",
+    "WeatherSource",
+]
