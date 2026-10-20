@@ -1,93 +1,181 @@
-# Weather Summary
 
-This Python package retrieves hourly weather data for Toronto from the Open-Meteo API and summarizes daily temperature and precipitation. It calculates daily minimum, maximum, and mean temperatures, along with total daily precipitation.
+# WeatherSummary - Lab 04
 
-## Data source
+WeatherSummary is a Python package that collects hourly weather data for Toronto from the Open-Meteo API. It calculates daily minimum, maximum, and mean temperatures and total daily precipitation.
 
-URL: https://api.open-meteo.com/v1/forecast?latitude=43.65&longitude=-79.38&hourly=temperature_2m,precipitation&past_days=7&forecast_days=0&timezone=America/Toronto
-
-One record: One hour of weather data, including time, temperature, and precipitation.
-
-Number of records: Approximately 168 hourly records over seven days.
+Lab 04 improves the Lab 03 package by adding automated tests, custom exceptions, logging, type checking, TOML settings, and reproducible sampling.
 
 ## Setup
 
-Create the Conda environment with Python 3.11:
+This project uses Python 3.11 and Conda.
+
+Open a terminal in the project root folder and run:
 
 ```bash
 conda env create -f environment.yml
-```
-
-Activate the environment:
-
-```bash
-conda activate weathersummary
-```
-
-Install the dependencies:
-
-```bash
+conda activate weathersummary-lab04
 pip install -r requirements.txt
+pip install -e .
 ```
 
-Install the package:
+- `environment.yml` creates the Conda environment with Python 3.11 and pip using conda-forge.
+- `requirements.txt` contains pinned package versions, including requests, pytest, mypy, ruff, and types-requests.
+- `pip install -e .` installs the WeatherSummary package in editable mode.
+
+The environment only needs to be created once. For later work, activate it with:
 
 ```bash
-pip install -e .
+conda activate weathersummary-lab04
 ```
 
 ## Run
 
-```bash
-python main.py
-```
+Run the program from the project root folder.
 
-**Note:** The program saves the weather summary to `data/processed/summary.json`.
-
-## Test
+Use the default configuration:
 
 ```bash
-python -m unittest discover -s tests
+python -m weathersummary.main
 ```
 
-## Layout
+Or specify the configuration file:
 
-- `models.py`: Contains the WeatherRecord class. It stores individual weather records and handles invalid values, so other modules can focus on their own tasks.
-- `sources.py`: Contains the WeatherSource class. It gets weather data from the API, so data collection is separate from calculations.
-- `aggregations.py`: Contains the Aggregation class and its subclasses. It calculates weather statistics, so calculations are kept in one module.
-- `report.py`: Contains functions to create and save the final summary. It keeps reporting separate from calculations.
-- `config.py`: Stores the API URL, timeout, and output path. It keeps all settings in one place.
-- `__init__.py`: Makes the main classes available for import. It makes the package easier to use.
-- `main.py`: Runs the program by connecting the other modules. It keeps the main program simple.
+```bash
+python -m weathersummary.main --config config/weathersummary.toml
+```
 
-## What moved where
+The program downloads hourly weather data and saves two JSON files in `data/processed/`:
 
-| Lab 02 function | Lab 03 location |
+- `summary.json`: weather summary and sampled dates.
+- `run_info.json`: configuration settings and software versions.
+
+The summary contains:
+
+| Key | Description |
 |---|---|
-| `fetch_weather_records()` | `fetch()` in the `WeatherSource` class in `sources.py`. It gets weather data and creates `WeatherRecord` objects. |
-| `calculate_daily_temperature()` | `calculate()` in the `TemperatureAggregation` class in `aggregations.py`. It calculates daily temperatures. Invalid values are now handled by `WeatherRecord` in `models.py`. |
-| `calculate_daily_precipitation()` | `calculate()` in the `PrecipitationAggregation` class in `aggregations.py`. It calculates daily precipitation. Invalid values are now handled by `WeatherRecord` in `models.py`. |
-| `build_summary()` | `build_summary()` in `report.py`. It creates the final summary and counts unique dates. |
-| `write_summary()` | `write_summary()` in `report.py`. It saves the summary to a JSON file. |
-| `main()` | `main()` in `main.py`. It connects the modules and runs the program. |
+| `source_url` | URL used to download weather data. |
+| `record_count` | Number of weather records processed. |
+| `days_processed` | Number of unique dates. |
+| `sample_days` | Dates selected using the random seed. |
+| `daily_temperature` | Daily minimum, maximum, and mean temperatures. |
+| `daily_precipitation` | Daily total precipitation. |
 
-## Design choices
 
-The WeatherRecord class represents one hourly weather record. It also handles missing and invalid values when a record is created.
+## Check it
 
-The WeatherSource class gets weather data from the API and creates WeatherRecord objects. This keeps data collection separate from calculations.
+Run the following commands to check the project:
 
-The Aggregation class is the base class for weather calculations. It provides a common calculate() method that returns an empty dictionary by default. This allows different aggregation subclasses to use the same method name.
+```bash
+python -m ruff format --check .
+python -m ruff check .
+python -m mypy
+python -m pytest
+```
 
-TemperatureAggregation and PrecipitationAggregation inherit from Aggregation. They both override the calculate() method. TemperatureAggregation calculates daily minimum, maximum, and mean temperatures. PrecipitationAggregation calculates daily total precipitation.
+Each command checks a different part of the project:
 
-In report.py, a loop calls calculate() on both aggregation objects without checking their types. This is an example of polymorphism.
+- **Ruff format:** checks code formatting.
+- **Ruff check:** checks import order, coding style, and possible errors.
+- **mypy:** checks Python type hints.
+- **pytest:** runs the automated tests.
 
-To add another subclass, I would create a new class that inherits from Aggregation and overrides the calculate() method. Then I would add the new class to the aggregation list in report.py.
+
+## Settings
+
+The program reads its configuration from `config/weathersummary.toml`.
+
+| Setting | Current value | Description |
+|---|---|---|
+| `source_url` | Open-Meteo API URL for Toronto | Specifies the source of hourly weather data. |
+| `timeout` | `10` | Maximum waiting time for an API request, in seconds. |
+| `output_folder` | `data/processed` | Folder where the JSON output files are saved. |
+| `seed` | `42` | Controls reproducible random sampling. |
+| `sample_size` | `5` | Number of dates selected for sampling. |
+| `log_level` | `INFO` | Controls logging levels. `INFO` hides DEBUG messages; `DEBUG` shows them. |
+
+
+## Errors and exit codes
+
+WeatherSummary uses custom exceptions to handle expected failures.
+
+`WeatherSummaryError` is the base exception class. The other three classes inherit from it.
+
+| Error class | When it is raised | What the user sees |
+|---|---|---|
+| `WeatherSummaryError` | Base class for expected package errors. Not raised directly. | No direct message; messages come from its subclasses. |
+| `SettingsError` | The configuration file is missing or contains invalid settings. | `Error: Could not read the configuration file.` or `Error: Invalid log_level.` |
+| `SourceError` | The API request fails because of a network or HTTP error. | `Error: Could not download the weather data.` |
+| `DataError` | The API returns invalid JSON or data with an unexpected structure. |  `Error: The API returned invalid JSON data.` or `Error: The weather data has an invalid structure.` |
+
+The package converts expected low-level errors into its own exceptions using `raise ... from err`. This preserves the original cause for debugging.
+
+The `main()` function handles these expected errors, logs the failure, and prints a short message to standard error (`stderr`).
+
+**Exit codes:**
+
+- `0`: The program completed successfully.
+- `1`: The program stopped because of an expected error, without a traceback.
+
+
+## Reproducing a run
+
+The seed and sample size are stored in `config/weathersummary.toml`:
+
+```toml
+seed = 42
+sample_size = 5
+```
+
+The program uses `random.Random(seed)` to select dates for `sample_days`. Automated tests check that the same seed produces the same selection when the input is unchanged.
+
+<sub><strong>Note:</strong> The <code>featured_shows</code> list in the assignment instructions was adapted to <code>sample_days</code> for this weather project. It selects dates instead of show names.</sub>
+
+Each successful run creates `data/processed/run_info.json`, which records the source URL, timeout, output folder, seed, sample size, log level, Python version, and versions of pytest, mypy, and Ruff.
+
+To reproduce a run:
+
+1. Use the same project code and Git commit.
+2. Create the environment using `environment.yml` and install the pinned packages from `requirements.txt`.
+3. Use the same settings in `config/weathersummary.toml`.
+4. Use the same input weather data, including the dates and their order.
+5. Run the program using the command in the Run section.
+
+**Important:** Open-Meteo data changes over time. The same seed produces the same `sample_days` only when the input dates and their order are unchanged. Reproducing an earlier run also requires the same settings, code, and software environment.
+
+## What the tests cover
+
+The project uses pytest to check important behavior without requiring an internet connection.
+
+The tests cover:
+
+- **WeatherRecord:** missing and invalid temperature and precipitation values.
+- **TemperatureAggregation:** daily minimum, maximum, and mean temperatures.
+- **PrecipitationAggregation:** daily precipitation totals.
+- **Daily grouping:** correct calculations for one day and multiple days.
+- **Data downloading:** network failures and invalid JSON responses.
+- **Data parsing:** missing required fields.
+- **Sampling:** sample size, unique dates, and reproducibility using the same seed.
+- **Parametrized tests:** different sample sizes tested using `pytest.mark.parametrize`.
+- **Exception testing:** expected errors and their messages using `pytest.raises(..., match=...)`.
+- **Fixtures:** shared handmade weather records from `tests/conftest.py`.
+- **Temporary files:** JSON writing tested with `tmp_path`.
+- **Logging:** WARNING messages checked with `caplog`.
+- **Main function:** successful execution, output file creation, failure exit code, and error messages.
+
+The tests use handmade weather records and `monkeypatch` to replace actual API requests. They do not need an internet connection.
+
+**What was not tested:**
+
+The automated tests do not check whether the live Open-Meteo API is currently available. The API is an external service, and the assignment requires tests that work without a network connection.
+
+The live API is checked separately by running the application.
 
 ## Known limitations
 
-- Running the main program requires an internet connection, but the unit tests can run offline.
-- The program counts unique dates but does not remove duplicate hourly weather records.
-- The zip() function stops at the shortest list. If the API returns lists with different lengths, some records may be skipped. I would add a check to make sure the lists have the same length.
-- Floating-point calculations may produce long decimal values, such as 10.799999999999999 instead of 10.8. I would use round() to make the results easier to read.
+- **Changing weather data:** Open-Meteo provides updated data, so results may change between runs. Saving the original input data would help reproduce past results.
+
+- **Missing and invalid values:** Missing or invalid values are skipped to avoid incorrect calculations. However, the summary does not show how many valid observations were used. Adding this count would make the results clearer.
+
+- **Unequal data lengths:** The parser uses `zip()`, so extra values are ignored if the API lists have different lengths. Validating the list lengths would prevent unnoticed data loss.
+
+- **Decimal precision:** Calculated values are saved without rounding and may contain long decimals. Formatting values for display would improve readability without changing the stored results.
