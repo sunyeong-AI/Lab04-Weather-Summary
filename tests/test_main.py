@@ -17,8 +17,8 @@ def test_main_invalid_config(capsys):
 
     assert exit_code == 1
     assert captured.err.splitlines() == [
-    "Error: Could not read the configuration file."
-]
+        "Error: Could not read the configuration file."
+    ]
 
 
 def test_main_success(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
